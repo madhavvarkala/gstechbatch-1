@@ -1,0 +1,230 @@
+Jenkins - Class 1
+
+Jenkins is a CI/CD tool which runs as a java application on any local server. It can be installed in multple ways as stated below.
+1. Install as standalone application on any server/OS like linux, windows, etc
+2. Install using docker on a docker container
+3. Install as a app servlet using any app server like Apache Tomcat or Glasfish
+
+As a best practice for beginer we will follow first method
+“Install as standalone application on any server/OS like linux, windows, etc”
+The prerequisites for installation of jenkins on any server are
+- Min 1GB RAM
+- Min 10GB disk space
+
+Installation on AWS RHEL8 server:
+As said earlier that Jenkins developed on java we should install java first on our server
+To install java - OpenJDK8
+$ yum install java-1.8.0-openjdk
+Check Java installed or not
+$ java -version
+Set JAVA_HOME path
+Open .bash_profile file
+$ vi .bash_profile
+Add below line in last column
+-export JAVA_HOME=usr/bin/java (/usr/bin/java is java installed location. Use ‘which java’ command to check where java installed)
+-export PATH=$JAVA_HOME/bin:$PATH
+Save and exit from vi editor
+Source the bash file
+$ source .bash_profile
+$ echo $JAVA_HOME (this should print your java home path)
+
+Jenkins Installation steps
+Install ‘wget’ if you don’t have with below command
+$ yum install wget
+Download repo of jenkins from jenkins official downloads
+$ sudo wget -O /etc/yum.repos.d/jenkins.repo https://pkg.jenkins.io/redhat-stable/jenkins.repo
+Download Jenkins key
+$ sudo rpm --import https://pkg.jenkins.io/redhat-stable/jenkins.io.key
+Install jenkins
+$ yum install jenkins
+Start the jenkins service
+$ systemctl start jenkins
+Check below 2 folders/files as they need to be installed as part of jenkins installtion
+$ cd /var/lib/jenkins
+$ cd /etc/sysconfig
+Modify jenkins port to custom port number from default 8080 port number
+$ cd /etc/sysconfig
+$ vi jenkins
+-JENKINS_PORT="8080" to JENKINS_PORT="8380"
+Save and exit vi editor
+Restart the jenkins
+$ systemctl restart jenkins
+Make sure you have ‘All Traffic’ as inbound and outbound rules in security groups of your AWS instance
+Copy the public ip and browse as below
+http://publicip:customportnumber
+Ex: http://:838018.188.231.239
+
+Get the password to unlock jenkins from /var/lib/jenkins/secrets/initialAdminPassword directory
+
+Install Jenkins with suggested plugins 
+Create user.
+
+
+
+
+
+The important things you need to focus once you logged in to Jenkins for the first time
+Manage Jenkins
+Credentials
+New Item
+My Views
+Manage Jenkins:
+There are 8 important options in Manage Jenkins
+Configure System: 
+This option is used for the configuration of Jenkins console and server
+Configure Global Security:
+This option is used to add the users to access the jenkins and jobs
+Configure Credentials:
+To add the credentials of various external apps like Git and also credentials of servers which are used in job configurations
+Global Tool Configuration:
+To add the homepath of the tools like Git, JDK, Maven, Sonar, Nexus, etc which are installed on server
+Manage Plugins:
+To install or remove or update of any plugins on Jenkins console
+System Information:
+To verify the Jenkins system details, global environment variables and plugins installed
+Manage Nodes:
+To add or delete or update agent nodes to use Master Agent architecture on Jenkins
+Manage Users:
+Create or delete or modify the users and groups to access the Jenkins and Jobs
+
+Credentials:
+To add the credentials of various external apps like Git and also credentials of servers which are used in job configurations
+
+My Views:
+To divide the jobs into different folders to differentiate their function
+
+New Item:
+To create the Jenkins project/job. Below are the types of jobs.
+Freestyle Jobs – Most used option which will provide end-to-end configuration which is available on Jenkins console depeneds on the plugins installed
+Pipeline – To create the Jenkins job using script configuration. Pipeline can be created using declarative pipeline or Scripted(Groovy) pipline.
+Maven Project – To create any specific job just to build the java code using maven tool
+Multi-branch Pipeline –To create large pipeline jobs using mutliple git branches
+Multi-ConfigurationProject –To create large configuration jobs using mutliple git branches 
+
+Look into the Freestyle Job configuration options below.
+
+FREESTYLE JOB CONFIGURATION:
+
+General:
+
+Description: To add desired or required description for the job
+Discard old builds: To delete old builds and keep latest builds depend on days or build qty
+This build requires lockable resources: To run this job on any restricted node/label
+This project is parameterized: To inject inputs into job configuration as dynamic values(variables)
+Boolean: check box type
+Choice: multiple options can be given
+Password: to enter password as parameter before running this job
+Credentials: to enter username/password or sshkey as parameter before running this job
+String: to enter the word like fill in the blanks type
+Multi-line string: to enter statements or more than one word
+Run: to run other projects/jobs after this job success/failure/unstable
+Throttle builds: To maintain wait time between each build
+Disable this project: To stop this job to run for temporary/permanent timeperiod
+Execute concurrent builds if necessary: to run this job parallel with other job
+Source Code Management
+
+Below are the SCM options available
+None
+Git
+Subversion
+Multiple SCMs
+
+Git – 
+Repositories
+Repository URL: provide HTTP or SSH URL from Github/Gitlab/Bitbucket
+Credentials: Add new or select the existing credentials. Username/Password for HTTP URL and SH private key for SSH URL
+Branch Specifier (blank for 'any'): Mention the branch name of that Git repository ex: master
+Build Triggers
+
+Trigger builds remotely (e.g., from scripts): To trigger the builds from external servers using shell scripts
+Build after other projects are built: To build as downstream job once upstream job is built
+Build periodically: To trigger the build based on given cron job schedule “MINUTE HOUR DOM MONTH DOW”
+Build periodically with parameters: To trigger the build based on given cron job schedule with given parameters (provided in “General>This project is parameterized”)
+GitHub hook trigger for GITScm polling: To build this job once the code is commited+pushed to given Git repository using Webhooks (Once you slect this option you get Webhook URL and paste in Gitlab>Project>Settings>Webhook>Add Webhooks)
+Poll SCM: To run this job at given cronjob schedule and only if the changes
+
+Build Environment
+
+Delete workspace before build starts: To clean the previous builds history in the server
+Use secret text or file: To use external scripts or files to inject into build source
+Abort the build if it's stuck: To stop the build if it struck at any step
+Add timestamps to the Console Output: To show the timestamp of each stage of build
+Inspect build log for published Gradle build scans: Specific for gradle build
+With Ant: Ant is a build tool like maven. To build using ant tool select this option and provide goal
+
+Build
+
+Execute windows batch command: To run any command or to perform any action on windows server
+Execute shell: To run any command or to perform any action on linux server
+
+Invoke Ant: Ant is a build tool like maven. To build using ant tool select this option and provide goal
+Invoke Gradle Script: Gradle is a build tool like maven. To build using Gradle tool select this option and provide goal
+Invoke Top Level Maven targets: To build any java project by giving pom.xml file path and maven goals like validate, compile, test, package, install and deploy
+Run with time-out: To abort the build at any time limit if it takes long time to build
+Send build status to “Pending” on Github commit: To add the commit status as “build success/failure/unstable” in Git repo
+
+Post-build Actions
+
+Archive the artifacts: To delete the artifacts from server workspace which are produced after maven build
+Build other projects: To build other project as downstream job once this build is success/failure/unstable 
+Publish Junit test result report: To use Junit application for testing of the application built after successful build
+E-mail notification: To send the mail notification once the build completed
+Extended E-mail notification: To send the customized mail notification once the build is success/failure/unstable
+Delete workspace when build is done: Clean up the server workspace once the build is done
+Manage Plugins:
+Go to Manage Jenkins > Manage Plugins
+Update - To update existing plugins
+Available - To install new plugins
+Installed -  To see the installed plugins
+Advanced - To install th plugins using .hpi files those downloaded externally
+
+Below are the useful plugins to install on any Jenkins
+1. Parameterized build plugin
+2. Invoke Maven plugin
+3. Invoke Ant plugin
+4. Blue Ocean Plugin
+5. 
+
+
+Installation of required tools:
+MAVEN:
+
+$ cd /opt
+$ wget https://www-eu.apache.org/dist/maven/maven-3/3.6.3/binaries/apache-maven-3.6.3-bin.tar.gz
+$ sudo tar xzf apache-maven-3.6.3-bin.tar.gz
+$ sudo ln -s apache-maven-3.6.3 maven
+$ cd
+$ vi .bash_profile
+
+Add below lines in vi file
+$ export M2_HOME=/opt/maven
+$ export PATH=${M2_HOME}/bin:${PATH}
+
+Save and exit from Vi editor
+
+$ source .bash_profile
+
+$ mvn –version
+
+SONARQUBE:
+It is a Quality Management tool to analyse below code quality parameters
+      -  Code Quality
+	   -  Test Quality
+	   -  Coverage
+	   -  Reports
+Free & Opensource
+Developed in Java
+Download the SonarQube
+	> wget https://binaries.sonarsource.com/Distribution/sonarqube/sonarqube-5.1.2.zip
+	> unzip sonarqube-5.1.2.zip
+Run it
+	> cd bin/
+	> cd linux-x86-64
+	> ./sonar.sh start
+	> ./sonar.sh status
+	> http://X.X.X.X:9000/
+	username/password
+
+Source Code - https://github.com/madhavvarkala/java-sonar-runner-simple.git
+
+
